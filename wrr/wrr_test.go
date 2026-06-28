@@ -5,12 +5,22 @@ import (
 )
 
 func TestWeightedRoundRobin(t *testing.T) {
-	w1 := NewWeightedItem[string]("a", 4)
-	w2 := NewWeightedItem[string]("b", 3)
-	w3 := NewWeightedItem[string]("c", 2)
-	w4 := NewWeightedItem[string]("d", 1)
+	w1 := NewWeightedItem[string]("w1", 5)
+	w2 := NewWeightedItem[string]("w2", 4)
+	w3 := NewWeightedItem[string]("w3", 3)
+	w4 := NewWeightedItem[string]("w4", 2)
+	w5 := NewWeightedItem[string]("w5", 1)
+
 	wrr := New[string](w1, w2, w3, w4)
-	for range 10 {
-		t.Log(wrr.Next())
+	wrr.Add(w5)
+	for range 15 {
+		next := wrr.Next()
+		t.Log(next.Identity(), next.Data())
+	}
+	t.Log("====")
+	wrr.Remove(w1, w2)
+	for range 15 {
+		next := wrr.Next()
+		t.Log(next.Identity(), next.Data())
 	}
 }
