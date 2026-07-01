@@ -18,7 +18,10 @@ func TestWeightedRoundRobin(t *testing.T) {
 		t.Log(next.Identity(), next.Data())
 	}
 	t.Log("====")
-	wrr.Remove(w1, w2)
+	ww1, _ := wrr.Get(w1.Identity())
+	wrr.SetWeight(w3.Identity(), 1)
+	wrr.SetWeight(w5.Identity(), 3)
+	wrr.Remove(ww1.Identity(), w2.Identity())
 	for range 15 {
 		next := wrr.Next()
 		t.Log(next.Identity(), next.Data())

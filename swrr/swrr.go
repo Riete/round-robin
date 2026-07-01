@@ -49,15 +49,22 @@ func (s *SmoothWeightedRoundRobin[T]) Add(items ...*WeightedItem[T]) {
 	}
 }
 
-func (s *SmoothWeightedRoundRobin[T]) Remove(items ...*WeightedItem[T]) {
+func (s *SmoothWeightedRoundRobin[T]) Get(identity int64) (*WeightedItem[T], bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	itemIds := make([]int64, 0, len(items))
-	for _, item := range items {
-		itemIds = append(itemIds, item.identity)
+	for _, item := range s.items {
+		if item.identity == identity {
+			return item, true
+		}
 	}
+	return nil, false
+}
+
+func (s *SmoothWeightedRoundRobin[T]) Remove(identities ...int64) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.items = slices.DeleteFunc(s.items, func(w *WeightedItem[T]) bool {
-		return slices.Contains(itemIds, w.identity)
+		return slices.Contains(identities, w.identity)
 	})
 }
 
@@ -85,6 +92,59 @@ func (s *SmoothWeightedRoundRobin[T]) Next() *WeightedItem[T] {
 	}
 	selected.current -= totalWeight
 	return selected
+}
+
+func (s *SmoothWeightedRoundRobin[T]) Replace(items ...*WeightedItem[T]) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.items = make([]*WeightedItem[T], 0, len(s.items))
+	s.items = append(s.items, items...)
+}
+
+func (s *SmoothWeightedRoundRobin[T]) Clear() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.items = make([]*WeightedItem[T], 0, cap(s.items))
+}
+
+func (s *SmoothWeightedRoundRobin[T]) All() []*WeightedItem[T] {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.items
+}
+
+func (s *SmoothWeightedRoundRobin[T]) SetWeight(identity, weight int64) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, item := range s.items {
+		if item.identity == identity {
+			item.weight = weight
+			return
+		}
+	}
+}
+
+func (s *SmoothWeightedRoundRobin[T]) SetData(identity int64, data T) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, item := range s.items {
+		if item.identity == identity {
+			item.data = data
+			return
+		}
+	}
+}
+
+func (s *SmoothWeightedRoundRobin[T]) SetWeightData(identity, weight int64, data T) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, item := range s.items {
+		if item.identity == identity {
+			item.data = data
+			item.weight = weight
+			return
+		}
+	}
 }
 
 func New[T any](items ...*WeightedItem[T]) *SmoothWeightedRoundRobin[T] {

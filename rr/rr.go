@@ -41,15 +41,22 @@ func (r *RoundRobin[T]) Add(items ...*RoundRobinItem[T]) {
 	r.count = int64(len(r.items))
 }
 
-func (r *RoundRobin[T]) Remove(items ...*RoundRobinItem[T]) {
+func (r *RoundRobin[T]) Get(identity int64) (*RoundRobinItem[T], bool) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	itemIds := make([]int64, 0, len(items))
-	for _, item := range items {
-		itemIds = append(itemIds, item.identity)
+	for _, item := range r.items {
+		if item.identity == identity {
+			return item, true
+		}
 	}
+	return nil, false
+}
+
+func (r *RoundRobin[T]) Remove(identities ...int64) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 	r.items = slices.DeleteFunc(r.items, func(r *RoundRobinItem[T]) bool {
-		return slices.Contains(itemIds, r.identity)
+		return slices.Contains(identities, r.identity)
 	})
 	r.count = int64(len(r.items))
 }
@@ -69,6 +76,36 @@ func (r *RoundRobin[T]) Next() *RoundRobinItem[T] {
 	item := r.items[r.index]
 	r.index++
 	return item
+}
+
+func (r *RoundRobin[T]) Replace(items ...*RoundRobinItem[T]) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.items = make([]*RoundRobinItem[T], 0, len(r.items))
+	r.items = append(r.items, items...)
+}
+
+func (r *RoundRobin[T]) Clear() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.items = make([]*RoundRobinItem[T], 0, cap(r.items))
+}
+
+func (r *RoundRobin[T]) All() []*RoundRobinItem[T] {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.items
+}
+
+func (r *RoundRobin[T]) Update(identity int64, data T) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, item := range r.items {
+		if item.identity == identity {
+			item.data = data
+			return
+		}
+	}
 }
 
 func New[T any](items ...*RoundRobinItem[T]) *RoundRobin[T] {

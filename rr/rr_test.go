@@ -16,7 +16,8 @@ func TestRoundRobin(t *testing.T) {
 		t.Log(next.Identity(), next.Data())
 	}
 	t.Log("====")
-	rr.Remove(r1, r2)
+	rr1, _ := rr.Get(r1.Identity())
+	rr.Remove(rr1.Identity(), r2.Identity())
 	for range 10 {
 		next := rr.Next()
 		t.Log(next.Identity(), next.Data())

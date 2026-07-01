@@ -16,8 +16,10 @@ func TestSmoothWeightedRoundRobin(t *testing.T) {
 		next := swrr.Next()
 		t.Log(next.Identity(), next.Data(), s1.NextWeight(), s2.NextWeight(), s3.NextWeight(), s4.NextWeight(), s5.NextWeight())
 	}
+	ss1, _ := swrr.Get(s1.Identity())
 	t.Log("====")
-	swrr.Remove(s1, s2)
+	swrr.SetWeight(s5.Identity(), 100)
+	swrr.Remove(ss1.Identity(), s2.Identity())
 	for range 15 {
 		next := swrr.Next()
 		t.Log(next.Identity(), next.Data(), s3.NextWeight(), s4.NextWeight(), s5.NextWeight())

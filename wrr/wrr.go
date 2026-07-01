@@ -48,19 +48,27 @@ func (w *WeightedRoundRobin[T]) Add(items ...*WeightedItem[T]) {
 	}
 }
 
-func (w *WeightedRoundRobin[T]) Remove(items ...*WeightedItem[T]) {
+func (w *WeightedRoundRobin[T]) Get(identity int64) (*WeightedItem[T], bool) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	itemIds := make([]int64, 0, len(items))
-	for _, item := range items {
-		itemIds = append(itemIds, item.identity)
+	for _, item := range w.items {
+		if item.identity == identity {
+			return item, true
+		}
 	}
-	w.items = slices.DeleteFunc(w.items, func(w *WeightedItem[T]) bool {
-		return slices.Contains(itemIds, w.identity)
+	return nil, false
+}
+
+func (w *WeightedRoundRobin[T]) Remove(identities ...int64) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.items = slices.DeleteFunc(w.items, func(item *WeightedItem[T]) bool {
+		if slices.Contains(identities, item.identity) {
+			w.totalWeight -= item.weight
+			return true
+		}
+		return false
 	})
-	for _, item := range items {
-		w.totalWeight -= item.weight
-	}
 }
 
 func (w *WeightedRoundRobin[T]) Next() *WeightedItem[T] {
@@ -84,6 +92,61 @@ func (w *WeightedRoundRobin[T]) Next() *WeightedItem[T] {
 		}
 	}
 	return w.items[len(w.items)-1]
+}
+
+func (w *WeightedRoundRobin[T]) Replace(items ...*WeightedItem[T]) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.items = make([]*WeightedItem[T], 0, len(w.items))
+	w.items = append(w.items, items...)
+}
+
+func (w *WeightedRoundRobin[T]) Clear() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.items = make([]*WeightedItem[T], 0, cap(w.items))
+}
+
+func (w *WeightedRoundRobin[T]) All() []*WeightedItem[T] {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.items
+}
+
+func (w *WeightedRoundRobin[T]) SetWeight(identity, weight int64) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	for _, item := range w.items {
+		if item.identity == identity {
+			w.totalWeight += weight - item.weight
+			item.weight = weight
+			return
+		}
+	}
+}
+
+func (w *WeightedRoundRobin[T]) SetData(identity int64, data T) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	for _, item := range w.items {
+		if item.identity == identity {
+			item.data = data
+			return
+		}
+	}
+}
+
+func (w *WeightedRoundRobin[T]) SetWeightData(identity, weight int64, data T) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	for _, item := range w.items {
+		if item.identity == identity {
+			w.totalWeight += weight - item.weight
+			item.weight = weight
+			item.data = data
+			return
+		}
+	}
 }
 
 func New[T any](items ...*WeightedItem[T]) *WeightedRoundRobin[T] {
