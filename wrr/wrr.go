@@ -69,6 +69,9 @@ func (w *WeightedRoundRobin[T]) Next() *WeightedItem[T] {
 	if len(w.items) == 0 {
 		return nil
 	}
+	if len(w.items) == 1 {
+		return w.items[0]
+	}
 	w.counter++
 	pos := w.counter % w.totalWeight
 	if pos == 0 {

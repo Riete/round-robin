@@ -67,6 +67,9 @@ func (s *SmoothWeightedRoundRobin[T]) Next() *WeightedItem[T] {
 	if len(s.items) == 0 {
 		return nil
 	}
+	if len(s.items) == 1 {
+		return s.items[0]
+	}
 	var totalWeight int64
 	for _, item := range s.items {
 		totalWeight += item.weight

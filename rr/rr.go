@@ -60,6 +60,9 @@ func (r *RoundRobin[T]) Next() *RoundRobinItem[T] {
 	if len(r.items) == 0 {
 		return nil
 	}
+	if len(r.items) == 1 {
+		return r.items[0]
+	}
 	if r.index >= r.count {
 		r.index = 0
 	}
