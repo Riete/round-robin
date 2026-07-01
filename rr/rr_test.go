@@ -23,3 +23,20 @@ func TestRoundRobin(t *testing.T) {
 		t.Log(next.Identity(), next.Data())
 	}
 }
+
+func TestPop(t *testing.T) {
+	r1 := NewRoundRobinItem("r1")
+	r2 := NewRoundRobinItem("r2")
+	r3 := NewRoundRobinItem("r3")
+	r4 := NewRoundRobinItem("r4")
+	rr := New(r1, r2, r3, r4)
+
+	x := rr.Pop()
+	t.Log(x.Data(), x.Identity())
+	x = rr.Pop()
+	t.Log(x.Data(), x.Identity())
+	for _, i := range rr.All() {
+		t.Log(i.Identity(), i.Data())
+	}
+
+}

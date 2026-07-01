@@ -149,6 +149,18 @@ func (w *WeightedRoundRobin[T]) SetWeightData(identity, weight int64, data T) {
 	}
 }
 
+func (w *WeightedRoundRobin[T]) Pop() *WeightedItem[T] {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if len(w.items) == 0 {
+		return nil
+	}
+	item := w.items[0]
+	w.totalWeight -= item.weight
+	w.items = slices.Delete(w.items, 0, 1)
+	return item
+}
+
 func New[T any](items ...*WeightedItem[T]) *WeightedRoundRobin[T] {
 	wrr := &WeightedRoundRobin[T]{}
 	wrr.Add(items...)

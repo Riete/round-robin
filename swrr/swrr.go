@@ -147,6 +147,17 @@ func (s *SmoothWeightedRoundRobin[T]) SetWeightData(identity, weight int64, data
 	}
 }
 
+func (s *SmoothWeightedRoundRobin[T]) Pop() *WeightedItem[T] {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(s.items) == 0 {
+		return nil
+	}
+	item := s.items[0]
+	s.items = slices.Delete(s.items, 0, 1)
+	return item
+}
+
 func New[T any](items ...*WeightedItem[T]) *SmoothWeightedRoundRobin[T] {
 	swrr := &SmoothWeightedRoundRobin[T]{}
 	swrr.Add(items...)

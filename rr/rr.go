@@ -108,6 +108,17 @@ func (r *RoundRobin[T]) Update(identity int64, data T) {
 	}
 }
 
+func (r *RoundRobin[T]) Pop() *RoundRobinItem[T] {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if len(r.items) == 0 {
+		return nil
+	}
+	item := r.items[0]
+	r.items = slices.Delete(r.items, 0, 1)
+	return item
+}
+
 func New[T any](items ...*RoundRobinItem[T]) *RoundRobin[T] {
 	rr := new(RoundRobin[T])
 	rr.Add(items...)
