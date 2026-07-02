@@ -55,6 +55,10 @@ func (r *RoundRobin[T]) Len() int {
 	return len(r.items)
 }
 
+func (r *RoundRobin[T]) Available() int {
+	return r.Len()
+}
+
 func (r *RoundRobin[T]) SetWeight(ID, int64) {}
 
 func (r *RoundRobin[T]) Next() *WeightedItem[T] {

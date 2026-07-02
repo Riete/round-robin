@@ -54,6 +54,18 @@ func (s *SmoothWeightedRR[T]) Len() int {
 	return len(s.items)
 }
 
+func (s *SmoothWeightedRR[T]) Available() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var count int
+	for _, item := range s.items {
+		if item.weight > 0 {
+			count++
+		}
+	}
+	return count
+}
+
 func (s *SmoothWeightedRR[T]) SetWeight(id ID, weight int64) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

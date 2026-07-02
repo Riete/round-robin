@@ -9,8 +9,9 @@ type Picker[T any] interface {
 	Contains(id ID) bool
 	All() []*WeightedItem[T]
 	Len() int
+	Available() int
 	SetWeight(id ID, weight int64)
 	Next() *WeightedItem[T]
-	Clear(func(*WeightedItem[T]))
-	Range(func(*WeightedItem[T]))
+	Clear(f func(*WeightedItem[T]))
+	Range(f func(*WeightedItem[T]))
 }

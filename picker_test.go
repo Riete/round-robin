@@ -103,3 +103,11 @@ func TestPickerClear(t *testing.T) {
 	swrr.Clear(f)
 	t.Log(swrr.All())
 }
+
+func TestPickerAvailable(t *testing.T) {
+	s1 := swrr.Add("a", 1)
+	swrr.Add("b", 1)
+	t.Log(swrr.Available())
+	swrr.SetWeight(s1, 0)
+	t.Log(swrr.Available())
+}
