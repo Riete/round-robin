@@ -16,6 +16,10 @@ func (w *WeightedItem[T]) Item() T {
 	return w.item
 }
 
+func (w *WeightedItem[T]) SetWeight(weight int64) {
+	w.weight = weight
+}
+
 func (w *WeightedItem[T]) Weight() int64 {
 	return w.weight
 }
