@@ -74,6 +74,10 @@ func (s *SmoothWeightedRR[T]) SetWeight(id ID, weight int64) {
 	}
 }
 
+func (s *SmoothWeightedRR[T]) HasNext() bool {
+	return s.Available() > 0
+}
+
 func (s *SmoothWeightedRR[T]) Next() *WeightedItem[T] {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -61,6 +61,10 @@ func (r *RoundRobin[T]) Available() int {
 
 func (r *RoundRobin[T]) SetWeight(ID, int64) {}
 
+func (r *RoundRobin[T]) HasNext() bool {
+	return r.Len() > 0
+}
+
 func (r *RoundRobin[T]) Next() *WeightedItem[T] {
 	r.mu.Lock()
 	defer r.mu.Unlock()
